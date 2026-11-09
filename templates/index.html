@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Michigan Math Planner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Local Course Planning Workspace</p>
+          <h1>University of Michigan LSA Math Planner</h1>
+          <p class="subtitle">Build, edit, and analyze prerequisite pathways as an interactive directed graph.</p>
+        </div>
+        <div class="topbar-meta">
+          <div class="stat-pill">
+            <span class="stat-label">Target</span>
+            <span id="target-course-pill">None selected</span>
+          </div>
+          <div class="stat-pill save-pill" id="save-indicator">Loading...</div>
+        </div>
+      </header>
+
+      <section class="notice-banner" id="disclaimer-banner"></section>
+
+      <main class="app-grid">
+        <aside class="sidebar left-sidebar">
+          <section class="card action-card">
+            <div class="section-heading">
+              <h2>Editing</h2>
+              <span class="section-kicker">Fast local changes</span>
+            </div>
+            <div class="button-grid">
+              <button class="primary-btn" id="add-course-btn">Add Course</button>
+              <button class="secondary-btn" id="add-link-btn">Add Prerequisite Link</button>
+              <button class="secondary-btn" id="undo-btn">Undo Last Change</button>
+              <button class="secondary-btn" id="import-btn">Import JSON</button>
+              <button class="secondary-btn" id="export-btn">Export JSON</button>
+              <button class="secondary-btn" id="export-png-btn">Export PNG</button>
+              <button class="secondary-btn" id="export-svg-btn">Export SVG</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="section-heading">
+              <h2>Search</h2>
+              <span class="section-kicker">Jump to a course</span>
+            </div>
+            <label class="field-label" for="search-input">Course ID or title</label>
+            <input id="search-input" class="text-input" type="search" placeholder="Search MATH 451 or Advanced Calculus">
+            <div class="search-results" id="search-results"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-heading">
+              <h2>Filters</h2>
+              <span class="section-kicker">Focus the graph</span>
+            </div>
+            <div id="status-filters" class="checkbox-grid"></div>
+            <label class="field-label" for="interest-filter">Interest level</label>
+            <select id="interest-filter" class="text-input">
+              <option value="all">All interest levels</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+            <label class="field-label" for="tag-filter">Topic tag</label>
+            <select id="tag-filter" class="text-input"></select>
+            <label class="field-label" for="verified-filter">Verification</label>
+            <select id="verified-filter" class="text-input">
+              <option value="all">All courses</option>
+              <option value="verified">Verified only</option>
+              <option value="unverified">Unverified only</option>
+            </select>
+            <label class="checkbox-inline">
+              <input id="path-only-filter" type="checkbox">
+              <span>Path to selected target only</span>
+            </label>
+          </section>
+
+          <section class="card">
+            <div class="section-heading">
+              <h2>Tag Manager</h2>
+              <span class="section-kicker">Create, rename, and delete tags</span>
+            </div>
+            <div class="inline-actions">
+              <button class="secondary-btn small-btn" id="add-tag-btn">Add Tag</button>
+            </div>
+            <div id="tag-manager-list" class="tag-manager-list"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-heading">
+              <h2>Gateway Courses</h2>
+              <span class="section-kicker">Highest downstream unlock count</span>
+            </div>
+            <div id="gateway-list" class="mini-list"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-heading">
+              <h2>My Next Options</h2>
+              <span class="section-kicker">Courses ready after completed work</span>
+            </div>
+            <div id="next-options-list" class="mini-list"></div>
+          </section>
+        </aside>
+
+        <section class="graph-column">
+          <div class="card graph-toolbar-card">
+            <div class="graph-toolbar">
+              <div class="toolbar-group">
+                <button class="secondary-btn" id="tree-layout-btn">Tree Layout</button>
+                <button class="secondary-btn" id="target-layout-btn">Target Tree</button>
+                <button class="secondary-btn" id="fit-graph-btn">Fit Graph</button>
+                <button class="secondary-btn" id="reset-layout-btn">Reset Layout</button>
+                <button class="secondary-btn" id="clear-selection-btn">Clear Selection</button>
+              </div>
+              <div class="toolbar-group legend-inline" id="legend-inline"></div>
+            </div>
+          </div>
+
+          <div class="card graph-card">
+            <div id="graph"></div>
+            <div class="graph-help">
+              Click a node for details, double-click to edit, or use Add Prerequisite Link to connect a prerequisite to a dependent course.
+            </div>
+          </div>
+        </section>
+
+        <aside class="sidebar right-sidebar">
+          <section class="card detail-card">
+            <div class="section-heading">
+              <h2>Course Detail</h2>
+              <span class="section-kicker">Selected node inspector</span>
+            </div>
+            <div id="course-detail-panel" class="detail-panel empty-state">
+              Select a course node to inspect details, edit status, manage tags, and work with prerequisites.
+            </div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <input id="import-file-input" type="file" accept="application/json" hidden>
+
+    <div id="toast" class="toast" hidden></div>
+    <div id="modal-root" class="modal-root" hidden></div>
+
+    <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
+    <script src="https://unpkg.com/cytoscape@3.29.2/dist/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
+    <script src="https://unpkg.com/cytoscape-svg@0.4.0/cytoscape-svg.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>
