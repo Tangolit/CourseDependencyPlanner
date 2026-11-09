@@ -1,0 +1,827 @@
+{
+  "meta": {
+    "disclaimer": "Course titles, prerequisite wording, and descriptions in this planner were seeded from the official University of Michigan LSA Mathematics undergraduate course pages on July 1, 2026. Official University of Michigan LSA, Mathematics Department, and Course Guide information controls for enrollment and prerequisite decisions.",
+    "last_saved": "2026-07-01T20:41:36.208388+00:00",
+    "target_course_id": ""
+  },
+  "tag_catalog": [
+    "algebra",
+    "analysis",
+    "applied math",
+    "combinatorics",
+    "cryptography",
+    "differential equations",
+    "finance / actuarial",
+    "foundations",
+    "logic",
+    "machine learning / data science",
+    "number theory",
+    "prerequisite / foundation",
+    "probability / statistics",
+    "target course",
+    "theoretical CS",
+    "topology"
+  ],
+  "courses": [
+    {
+      "id": "EECS 183",
+      "title": "External prerequisite referenced by Math 423",
+      "description": "Placeholder node for the programming prerequisite referenced on the official Math 423 page.",
+      "credits": 0,
+      "status": "completed",
+      "interest": "low",
+      "categories": [
+        "theoretical CS"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/400-level-courses.html",
+      "verified": false,
+      "notes": "Referenced by the official Math 423 prerequisite text as 'EECS 183 or equivalent.'",
+      "prerequisite_text": "",
+      "prerequisites": {
+        "all_of": []
+      }
+    },
+    {
+      "id": "EECS 501",
+      "title": "External prerequisite referenced by Math 526",
+      "description": "Placeholder node for the alternative EECS prerequisite referenced on the official Math 526 page.",
+      "credits": 0,
+      "status": "not_started",
+      "interest": "low",
+      "categories": [
+        "theoretical CS"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/500-level-math-courses.html",
+      "verified": false,
+      "notes": "Referenced by the official Math 526 prerequisite text as 'Math 525 or EECS 501.'",
+      "prerequisite_text": "",
+      "prerequisites": {
+        "all_of": []
+      }
+    },
+    {
+      "id": "MATH 115",
+      "title": "Calculus I",
+      "description": "Introductory calculus focused on functions, derivatives, and a first introduction to integration.",
+      "credits": 4,
+      "status": "completed",
+      "interest": "medium",
+      "categories": [
+        "foundations",
+        "analysis"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/100-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "3-4 years HS Math including trigonometry",
+      "prerequisites": {
+        "all_of": []
+      }
+    },
+    {
+      "id": "MATH 116",
+      "title": "Calculus II",
+      "description": "Continuation of the standard calculus sequence covering integration techniques, series, and introductory differential equations.",
+      "credits": 4,
+      "status": "completed",
+      "interest": "medium",
+      "categories": [
+        "foundations",
+        "analysis"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/100-level-math-courses.html",
+      "verified": true,
+      "notes": "Graph prerequisite simplified to MATH 115; the official text also allows AP credit.",
+      "prerequisite_text": "Math 115 or AP Credit",
+      "prerequisites": {
+        "all_of": [
+          "MATH 115"
+        ]
+      }
+    },
+    {
+      "id": "MATH 156",
+      "title": "Applied Honors Calculus II",
+      "description": "An honors-oriented alternative to Math 116 with more emphasis on science applications and theory.",
+      "credits": 4,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "foundations",
+        "analysis"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/100-level-math-courses.html",
+      "verified": true,
+      "notes": "Official prerequisite is AP exam based, so no incoming graph edge is stored.",
+      "prerequisite_text": "Score of 4 or 5 on Advanced Placement AB or BC Calculus exam",
+      "prerequisites": {
+        "all_of": []
+      }
+    },
+    {
+      "id": "MATH 186",
+      "title": "Honors Calculus II",
+      "description": "A rigorous continuation of the honors calculus sequence that develops deeper theoretical foundations.",
+      "credits": 4,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "foundations",
+        "analysis"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/100-level-math-courses.html",
+      "verified": true,
+      "notes": "Official prerequisite references Math 185, which is not included in this focused seed.",
+      "prerequisite_text": "Permission of honors advisor or Math 185",
+      "prerequisites": {
+        "all_of": []
+      }
+    },
+    {
+      "id": "MATH 205",
+      "title": "Calculus of Several Variables",
+      "description": "A multivariable calculus alternative to Math 215 with an emphasis on concepts and applications.",
+      "credits": 4,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "analysis",
+        "foundations"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/200-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 116, 156, 186, 276 or 296",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 116",
+              "MATH 156",
+              "MATH 186",
+              "MATH 276",
+              "MATH 296"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 214",
+      "title": "Applied Linear Algebra",
+      "description": "A linear algebra course centered on matrix methods, concepts, and applications.",
+      "credits": 4,
+      "status": "completed",
+      "interest": "medium",
+      "categories": [
+        "algebra",
+        "foundations"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/200-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 116, 156, 186, 276, or 296",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 116",
+              "MATH 156",
+              "MATH 186",
+              "MATH 276",
+              "MATH 296"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 215",
+      "title": "Multivariable & Vector Calculus",
+      "description": "The standard multivariable calculus course in the main introductory mathematics sequence.",
+      "credits": 4,
+      "status": "completed",
+      "interest": "medium",
+      "categories": [
+        "analysis",
+        "foundations"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/200-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 116, 156, 186, 276, or 296",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 116",
+              "MATH 156",
+              "MATH 186",
+              "MATH 276",
+              "MATH 296"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 216",
+      "title": "Introduction to Differential Equations",
+      "description": "An applications-focused differential equations course for science and engineering students.",
+      "credits": 4,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "differential equations",
+        "applied math",
+        "foundations"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/200-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 116, 156, 186, 276, or 296",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 116",
+              "MATH 156",
+              "MATH 186",
+              "MATH 276",
+              "MATH 296"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 217",
+      "title": "Linear Algebra",
+      "description": "The proof-oriented linear algebra course that anchors many upper-level pure and applied math paths.",
+      "credits": 4,
+      "status": "not_started",
+      "interest": "high",
+      "categories": [
+        "algebra",
+        "foundations"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/200-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 215 or 285 or 205",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 215",
+              "MATH 285",
+              "MATH 205"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 276",
+      "title": "Explorations in Calculus (IBL)",
+      "description": "An inquiry-based, theory-leaning calculus course designed to prepare students for honors multivariable work.",
+      "credits": 4,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "analysis",
+        "foundations"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/200-level-math-courses.html",
+      "verified": true,
+      "notes": "The Honors Sequences page also describes Math 276 as part of the honors seminar mathematics sequence.",
+      "prerequisite_text": "Math 115 or AP Credit or permission of math advisor; highly recommended for students who have taken Math 275",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 115"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 285",
+      "title": "Honors Multivariable & Vector Calculus (IBL)",
+      "description": "The honors multivariable calculus option with a more theoretical approach than Math 215.",
+      "credits": 4,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "analysis",
+        "foundations"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/200-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 156, 186, 276, or permission of honors advisor",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 156",
+              "MATH 186",
+              "MATH 276"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 286",
+      "title": "Honors Differential Equations",
+      "description": "The honors differential equations course in the honors calculus sequence.",
+      "credits": 3,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "differential equations",
+        "applied math"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/200-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 285 or permission of instructor",
+      "prerequisites": {
+        "all_of": [
+          "MATH 285"
+        ]
+      }
+    },
+    {
+      "id": "MATH 296",
+      "title": "Honors Mathematics II",
+      "description": "Part of the most theoretical honors mathematics sequence, with strong preparation for advanced analysis and algebra.",
+      "credits": 4,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "analysis",
+        "algebra",
+        "foundations"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/200-level-math-courses.html",
+      "verified": true,
+      "notes": "Official prerequisite references Math 295, which is not included in this focused seed.",
+      "prerequisite_text": "Math 295",
+      "prerequisites": {
+        "all_of": []
+      }
+    },
+    {
+      "id": "MATH 312",
+      "title": "Applied Modern Algebra",
+      "description": "A proof-oriented algebra course that ties abstract structures to applications such as automata and coding.",
+      "credits": 3,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "algebra",
+        "theoretical CS"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/300-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 217",
+      "prerequisites": {
+        "all_of": [
+          "MATH 217"
+        ]
+      }
+    },
+    {
+      "id": "MATH 314",
+      "title": "Mathematics of Blockchains and Cryptocurrencies",
+      "description": "A course on the mathematical and algorithmic ideas behind blockchains, cryptography, and related systems.",
+      "credits": 3,
+      "status": "interested",
+      "interest": "high",
+      "categories": [
+        "cryptography",
+        "theoretical CS",
+        "target course"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/300-level-math-courses.html",
+      "verified": true,
+      "notes": "The official prerequisite wording is advisory. The graph stores a planner-friendly math-background approximation and leaves programming preparation in the exact text field.",
+      "prerequisite_text": "Math prerequisites (advisory): One previous college math class in discrete math or linear algebra or abstract algebra (eg. EECS 203, MATH 214, MATH 217, MATH 275, MATH 312). Programming prerequisites: Fundamental concepts of programming in a high-level language, preferably Python (eg. COMPFOR 131; PHYSICS 104; or EECS 183 with prior Python knowledge).",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 214",
+              "MATH 217",
+              "MATH 312"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 316",
+      "title": "Differential Equations",
+      "description": "A proof-aware differential equations course for students who have already studied linear algebra.",
+      "credits": 3,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "differential equations",
+        "applied math"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/300-level-math-courses.html",
+      "verified": true,
+      "notes": "Graph structure is a planner-friendly summary of the official wording.",
+      "prerequisite_text": "Math 215 or 285; and 217, or 205",
+      "prerequisites": {
+        "all_of": [
+          "MATH 217",
+          {
+            "any_of": [
+              "MATH 215",
+              "MATH 285",
+              "MATH 205"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 351",
+      "title": "Principles of Analysis (IBL)",
+      "description": "An introduction to rigorous analysis and proof that develops the ideas underlying calculus.",
+      "credits": 3,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "analysis",
+        "foundations"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/300-level-math-courses.html",
+      "verified": true,
+      "notes": "The graph uses a simplified summary; check the exact prerequisite wording for the official logic.",
+      "prerequisite_text": "Math 215 and 217 or 205 or 285, or permission of instructor",
+      "prerequisites": {
+        "all_of": [
+          "MATH 217",
+          {
+            "any_of": [
+              "MATH 215",
+              "MATH 205",
+              "MATH 285"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 412",
+      "title": "Introduction to Modern Algebra (IBL)",
+      "description": "A proof-focused introduction to abstract algebra and mathematical structures such as groups, rings, and fields.",
+      "credits": 3,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "algebra",
+        "foundations"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/400-level-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 205 or 215 or 285; and Math 217",
+      "prerequisites": {
+        "all_of": [
+          "MATH 217",
+          {
+            "any_of": [
+              "MATH 205",
+              "MATH 215",
+              "MATH 285"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 423",
+      "title": "Mathematics of Finance",
+      "description": "An introduction to mathematical finance focused on derivative pricing models and their probabilistic foundations.",
+      "credits": 3,
+      "status": "interested",
+      "interest": "high",
+      "categories": [
+        "finance / actuarial",
+        "probability / statistics",
+        "target course"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/400-level-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 217 and Math 425 or 525, and EECS 183 or equivalent",
+      "prerequisites": {
+        "all_of": [
+          "MATH 217",
+          "EECS 183",
+          {
+            "any_of": [
+              "MATH 425",
+              "MATH 525"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 424",
+      "title": "Compound Interest and Life Insurance",
+      "description": "An actuarial-oriented course on interest theory and valuation of deposits, annuities, and bonds.",
+      "credits": 3,
+      "status": "not_started",
+      "interest": "medium",
+      "categories": [
+        "finance / actuarial",
+        "applied math"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/400-level-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 205 or 215 or 285",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 205",
+              "MATH 215",
+              "MATH 285"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 425",
+      "title": "Introduction to Probability",
+      "description": "A probability course covering both theory and applications across discrete and continuous settings.",
+      "credits": 3,
+      "status": "interested",
+      "interest": "high",
+      "categories": [
+        "probability / statistics",
+        "target course"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/400-level-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 205 or 215 or 285",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 205",
+              "MATH 215",
+              "MATH 285"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 451",
+      "title": "Advanced Calculus I",
+      "description": "A rigorous analysis course centered on proofs, structure, and the foundations of calculus.",
+      "credits": 3,
+      "status": "not_started",
+      "interest": "high",
+      "categories": [
+        "analysis",
+        "foundations"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/400-level-courses.html",
+      "verified": true,
+      "notes": "The official prerequisite wording is example-based. The graph uses MATH 217 and MATH 412 as a planner-friendly approximation.",
+      "prerequisite_text": "Previous exposure to abstract mathematics, e.g. MATH 217 and 412",
+      "prerequisites": {
+        "all_of": [
+          "MATH 217",
+          "MATH 412"
+        ]
+      }
+    },
+    {
+      "id": "MATH 462",
+      "title": "Mathematical Models",
+      "description": "An applied modeling course that emphasizes translating real problems into mathematics and analyzing them.",
+      "credits": 3,
+      "status": "interested",
+      "interest": "high",
+      "categories": [
+        "applied math",
+        "differential equations",
+        "target course"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/400-level-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 216, 286, or 316; and Math 217, 417, or 419",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 216",
+              "MATH 286",
+              "MATH 316"
+            ]
+          },
+          "MATH 217"
+        ]
+      }
+    },
+    {
+      "id": "MATH 465",
+      "title": "Introduction to Combinatorics",
+      "description": "An introductory combinatorics course covering counting methods and graph theory fundamentals.",
+      "credits": 3,
+      "status": "not_started",
+      "interest": "high",
+      "categories": [
+        "combinatorics",
+        "theoretical CS"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/400-level-courses.html",
+      "verified": true,
+      "notes": "The official prerequisite allows additional linear algebra alternatives and instructor permission.",
+      "prerequisite_text": "Linear Algebra (one of Math 214, 217, 296, 417, or 419) or permission of instructor",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 214",
+              "MATH 217",
+              "MATH 296"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 474",
+      "title": "Introduction to Stochastic Analysis for Finance",
+      "description": "A continuation of mathematical finance into stochastic calculus and continuous-time models.",
+      "credits": 3,
+      "status": "interested",
+      "interest": "high",
+      "categories": [
+        "finance / actuarial",
+        "probability / statistics",
+        "target course"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/400-level-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 525 and 423",
+      "prerequisites": {
+        "all_of": [
+          "MATH 525",
+          "MATH 423"
+        ]
+      }
+    },
+    {
+      "id": "MATH 525",
+      "title": "Probability Theory",
+      "description": "An introductory graduate-level probability course focused on core concepts, major results, and proofs.",
+      "credits": 3,
+      "status": "interested",
+      "interest": "high",
+      "categories": [
+        "probability / statistics",
+        "target course"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/500-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "One semester of multivariable calculus (205, 215, 285 or equivalent) and one semester of analysis (351, 451, or equivalent), OR graduate standing.",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 205",
+              "MATH 215",
+              "MATH 285"
+            ]
+          },
+          {
+            "any_of": [
+              "MATH 351",
+              "MATH 451"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 526",
+      "title": "Discrete State Stochastic Processes",
+      "description": "A second probability course on stochastic processes in discrete and continuous time.",
+      "credits": 3,
+      "status": "interested",
+      "interest": "high",
+      "categories": [
+        "probability / statistics",
+        "target course"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/500-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 525 or EECS 501",
+      "prerequisites": {
+        "all_of": [
+          {
+            "any_of": [
+              "MATH 525",
+              "EECS 501"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "MATH 565",
+      "title": "Combinatorics and Graph Theory",
+      "description": "A beginning graduate combinatorics course with emphasis on graph theory and related structures.",
+      "credits": 3,
+      "status": "interested",
+      "interest": "high",
+      "categories": [
+        "combinatorics",
+        "target course"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/500-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 465 or equivalent experience with abstract mathematics.",
+      "prerequisites": {
+        "all_of": [
+          "MATH 465"
+        ]
+      }
+    },
+    {
+      "id": "MATH 566",
+      "title": "Combinatorial Theory",
+      "description": "A beginning graduate combinatorics course emphasizing enumerative and algebraic techniques.",
+      "credits": 3,
+      "status": "interested",
+      "interest": "high",
+      "categories": [
+        "combinatorics",
+        "target course"
+      ],
+      "semester_offered": [],
+      "source_url": "https://lsa.umich.edu/math/undergraduates/undergraduate-math-courses/500-level-math-courses.html",
+      "verified": true,
+      "notes": "",
+      "prerequisite_text": "Math 465 or equivalent experience with abstract mathematics.",
+      "prerequisites": {
+        "all_of": [
+          "MATH 465"
+        ]
+      }
+    }
+  ]
+}
