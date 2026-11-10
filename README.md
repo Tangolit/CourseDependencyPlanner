@@ -4,6 +4,9 @@ A local Flask application for editing prerequisite graphs and generating semeste
 The existing Michigan course catalog and completion statuses stay in `data/courses.json`.
 Planning is read-only; downloading a plan never changes course statuses.
 
+[Measured benchmark results](benchmarks/RESULTS.md) include repeated timings, solver outcomes,
+hardware/software details, full synthetic inputs and raw samples.
+
 ## Run Locally
 
 Python 3.11-3.14 is supported. On Windows PowerShell, no global `pip` command or virtual-environment activation is needed:
@@ -117,12 +120,21 @@ Each result reports status, objective values, additional prerequisites, term ass
 node --check static/app.js
 node --check static/schedule.js
 node --test tests/test_frontend.cjs
-.\.venv\Scripts\python.exe -m benchmarks.schedule_benchmark --sizes 20 50 100 --seconds 2
+$env:PYTHONHASHSEED = '0'
+.\.venv\Scripts\python.exe -m benchmarks.schedule_benchmark --sizes 20 50 100 200 --seconds 2 --repeats 5 --warmups 1 --output benchmark-results.json
 ```
 
 Tests cover nested logic, shared dependencies, cycles, malformed input, persistence failure, both strategies, term ordering, availability, capacity and infeasible plans.
 For small random catalogs, an independent exhaustive assignment oracle verifies the CP-SAT objective, not just example output.
 GitHub Actions runs tests and lint on Windows/Linux with Python 3.11/3.14, plus JavaScript syntax checks.
-Synthetic benchmarks print JSON timings/statuses and verify every complete plan; timings are machine-dependent and not a performance guarantee.
+Benchmarks warm up each case/strategy, alternate measurement order, retain every measured outcome,
+and verify every complete plan. They include nested AND/OR offerings and infeasible cases in addition to
+the requested graph sizes. The two-second limit applies to solver search, not total call latency.
+The ignored root `benchmark-results.json` is for your own runs; the published raw report lives in
+`benchmarks/results/` and is linked from [the results and methodology](benchmarks/RESULTS.md).
+Timings are machine-dependent, not a performance guarantee.
+
+Repository hygiene tests reject tracked Python bytecode. `__pycache__/` and `*.py[cod]` remain ignored;
+local caches may exist, but they are no longer part of Git.
 
 Solver reference: [Google's CP-SAT documentation](https://developers.google.com/optimization/cp/cp_solver).
