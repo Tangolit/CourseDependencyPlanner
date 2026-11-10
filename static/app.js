@@ -113,7 +113,10 @@ function applyState(payload, options = {}) {
   renderNextOptions();
   renderDetailPanel();
   renderGraph();
+  document.dispatchEvent(new CustomEvent("planner:state", { detail: appState.data }));
 }
+
+document.addEventListener("planner:focus", (event) => focusCourse(event.detail));
 
 function renderStaticSections() {
   document.getElementById("disclaimer-banner").textContent = appState.data.meta.disclaimer;
@@ -238,7 +241,7 @@ function renderGatewayList() {
     card.innerHTML = `
       <div>
         <div class="item-title">${escapeHtml(item.course_id)}</div>
-        <div class="item-subtitle">Unlocks ${item.unlock_count} downstream courses</div>
+        <div class="item-subtitle">Makes ${item.unlock_count} more courses eligible${item.eligible_now ? "" : " (not yet eligible itself)"}</div>
       </div>
       <button class="secondary-btn small-btn">View</button>
     `;
@@ -397,7 +400,7 @@ function renderDetailPanel() {
     </div>
 
     <div class="detail-section">
-      <h4>Directly unlocked courses</h4>
+      <h4>Direct dependents (other prerequisites may apply)</h4>
       <div class="list-block">${renderIdList(insights.directly_unlocked_courses)}</div>
     </div>
 
@@ -487,8 +490,8 @@ function renderRequirementGroups(groups) {
       (group) => `
         <div class="list-pill">
           <strong>${escapeHtml(group.label)}</strong><br>
-          <span>${escapeHtml(group.course_ids.join(", "))}</span><br>
-          <span class="muted-text">${group.satisfied ? `Satisfied by: ${escapeHtml((group.satisfied_by || []).join(", ") || "completed coursework")}` : `Missing: ${escapeHtml(group.missing.join(", "))}`}</span>
+          <span>${escapeHtml(formatRequirement(group.expression))}</span><br>
+          <span class="muted-text">${group.satisfied ? `Satisfied by: ${escapeHtml((group.satisfied_by || []).join(", ") || "completed coursework")}` : `One way to satisfy this group: ${escapeHtml(group.missing.join(", ") || "No valid option")}`}</span>
         </div>
       `
     )
@@ -504,13 +507,21 @@ function renderIdList(ids) {
     .join("");
 }
 
+function formatRequirement(expr) {
+  if (typeof expr === "string") return expr;
+  const key = expr?.any_of ? "any_of" : "all_of";
+  const children = expr?.[key] || [];
+  if (!children.length) return key === "all_of" ? "No prerequisites" : "No valid option";
+  return `(${children.map(formatRequirement).join(key === "any_of" ? " OR " : " AND ")})`;
+}
+
 function renderTargetSummary(courseId, targetAnalysis) {
   if (!targetAnalysis) {
     return '<div class="list-pill muted-text">Set a target course to highlight relevant prerequisite paths.</div>';
   }
   if (courseId === targetAnalysis.target_course_id) {
     return `
-      <div class="list-pill">Current target course. ${targetAnalysis.missing_prerequisites.missing_course_ids.length ? `Missing: ${escapeHtml(targetAnalysis.missing_prerequisites.missing_course_ids.join(", "))}` : "All listed prerequisite groups are satisfied by completed courses."}</div>
+      <div class="list-pill">Current target course. ${targetAnalysis.missing_prerequisites.status !== "optimal" ? "No minimum prerequisite set proven: " + escapeHtml(targetAnalysis.missing_prerequisites.status) : targetAnalysis.missing_prerequisites.missing_course_ids.length ? `One minimum prerequisite set: ${escapeHtml(targetAnalysis.missing_prerequisites.missing_course_ids.join(", "))}` : "All listed prerequisite groups are satisfied by completed courses."}</div>
       ${targetAnalysis.paths.map((item) => `<div class="list-pill mono">${escapeHtml(item.path.join(" → "))}</div>`).join("") || '<div class="list-pill muted-text">No prerequisite path found yet.</div>'}
     `;
   }
@@ -844,6 +855,7 @@ function computeTreePositions(mode = "tree") {
   });
 
   appState.cy.edges().forEach((edge) => {
+    if (edge.hasClass("hidden")) return;
     const source = edge.source().id();
     const target = edge.target().id();
     if (!includedIds.has(source) || !includedIds.has(target)) {
@@ -979,15 +991,14 @@ function handleAddLinkTap(nodeId) {
 
   const data = cloneData();
   const course = data.courses.find((item) => item.id === dependentId);
-  const groups = prerequisiteExpressionToEditorGroups(course.prerequisites);
-  const alreadyPresent = groups.some((group) => group.courseIds.includes(prereqId));
+  const alreadyPresent = flattenPrereqExpression(course.prerequisites).includes(prereqId);
   if (alreadyPresent) {
     showToast(`${prereqId} is already listed for ${dependentId}.`);
     refreshGraphDecorations();
     return;
   }
-  groups.push({ type: "all_of", courseIds: [prereqId] });
-  course.prerequisites = editorGroupsToExpression(groups);
+  const existing = course.prerequisites;
+  course.prerequisites = { all_of: [...(existing.all_of || [existing]), prereqId] };
   persistData(data, { message: `Added ${prereqId} → ${dependentId}.`, selectedCourseId: dependentId });
 }
 
@@ -1025,6 +1036,10 @@ function openCourseModal(courseId = null) {
           <div>
             <label class="field-label" for="course-credits-input">Credits</label>
             <input id="course-credits-input" class="text-input" type="number" min="0" step="1" value="${escapeAttribute(String(course.credits))}">
+          </div>
+          <div>
+            <label class="field-label" for="course-difficulty-input">Difficulty (4-5 is difficult)</label>
+            <input id="course-difficulty-input" class="text-input" type="number" min="1" max="5" step="1" value="${course.difficulty || 3}" required>
           </div>
           <div>
             <label class="field-label" for="course-status-input">Status</label>
@@ -1099,6 +1114,7 @@ function openCourseModal(courseId = null) {
       title,
       description: document.getElementById("course-description-input").value.trim(),
       credits: Number(document.getElementById("course-credits-input").value) || 0,
+      difficulty: Number(document.getElementById("course-difficulty-input").value),
       status: document.getElementById("course-status-input").value,
       interest: document.getElementById("course-interest-input").value,
       categories: parseCommaList(document.getElementById("course-categories-input").value),
@@ -1166,6 +1182,10 @@ function renamePrereqReference(expr, previousId, nextId) {
 
 function openPrerequisiteModal(courseId) {
   const course = getCourse(courseId);
+  if (!canUseGroupEditor(course.prerequisites)) {
+    openNestedPrerequisiteModal(courseId);
+    return;
+  }
   const state = {
     courseId,
     groups: prerequisiteExpressionToEditorGroups(course.prerequisites),
@@ -1283,6 +1303,7 @@ function openPrerequisiteModal(courseId) {
 }
 
 function prerequisiteExpressionToEditorGroups(expr) {
+  if (expr?.any_of) return [{ type: "any_of", courseIds: [...expr.any_of] }];
   if (!expr || !expr.all_of || !expr.all_of.length) {
     return [];
   }
@@ -1297,6 +1318,36 @@ function prerequisiteExpressionToEditorGroups(expr) {
       return { type: "all_of", courseIds: flattenPrereqExpression(entry) };
     }
     return { type: "all_of", courseIds: [] };
+  });
+}
+
+function canUseGroupEditor(expr) {
+  if (typeof expr === "string") return false;
+  const groups = expr?.all_of || [expr];
+  return groups.every((group) => typeof group === "string" ||
+    (group && Object.values(group).length === 1 && Object.values(group)[0].every((child) => typeof child === "string")));
+}
+
+function openNestedPrerequisiteModal(courseId) {
+  showModal(`
+    <div class="modal-card">
+      <h3>Nested prerequisites for ${escapeHtml(courseId)}</h3>
+      <p class="helper-text">This expression contains nested AND/OR groups. Edit its JSON without flattening the logic. Use course IDs as leaves and all_of/any_of arrays as groups.</p>
+      <label class="field-label" for="nested-prereq-input">Requirement expression</label>
+      <textarea id="nested-prereq-input" class="textarea-input mono" rows="16">${escapeHtml(JSON.stringify(getCourse(courseId).prerequisites, null, 2))}</textarea>
+      <div id="nested-prereq-error" role="alert"></div>
+      <div class="modal-actions"><button class="ghost-btn" data-close-modal>Cancel</button><button class="primary-btn" id="save-nested-prereq">Save Prerequisites</button></div>
+    </div>`);
+  document.getElementById("save-nested-prereq").addEventListener("click", async () => {
+    try {
+      const expression = JSON.parse(document.getElementById("nested-prereq-input").value);
+      const data = cloneData();
+      data.courses.find((course) => course.id === courseId).prerequisites = expression;
+      // The API validates the complete expression before any write.
+      await persistData(data, { message: `Updated prerequisites for ${courseId}.`, selectedCourseId: courseId, closeOnSuccess: true });
+    } catch (error) {
+      document.getElementById("nested-prereq-error").textContent = error.message;
+    }
   });
 }
 
@@ -1512,9 +1563,12 @@ async function persistData(data, options = {}) {
     applyState(payload.state, applyOptions);
     setSaveIndicator("saved", "Saved");
     showToast(options.message || "Saved changes.");
+    if (options.closeOnSuccess) closeModal();
+    return true;
   } catch (error) {
     setSaveIndicator("error", "Save failed");
     showToast(error.message);
+    return false;
   }
 }
 

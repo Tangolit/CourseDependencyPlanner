@@ -636,6 +636,50 @@ textarea {
   gap: 10px;
 }
 
+.scheduler-card { margin-bottom: 18px; }
+.schedule-heading, .schedule-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.schedule-heading h2 { font-family: var(--font-display); font-size: 1.8rem; margin: 0; }
+.schedule-heading .helper-text { margin-bottom: 0; }
+.schedule-badge { border: 1px solid var(--border-strong); border-radius: 999px; background: #f7f2df; color: var(--navy); padding: 8px 12px; font-size: .8rem; }
+.schedule-controls { display: grid; grid-template-columns: minmax(240px, .8fr) minmax(0, 1.7fr); gap: 28px; margin: 22px 0; }
+.schedule-settings { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.schedule-settings > label { font-size: .85rem; font-weight: 600; }
+.schedule-settings .text-input { margin-top: 8px; }
+.schedule-settings .schedule-summer { align-self: end; min-height: 44px; }
+.schedule-targets details { margin-bottom: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; }
+.scheduler-card summary { cursor: pointer; color: var(--navy); font-weight: 600; }
+.schedule-checklist { max-height: 230px; overflow-y: auto; display: grid; gap: 8px; margin-top: 12px; }
+.schedule-checklist span { overflow-wrap: anywhere; }
+.schedule-actions { justify-content: flex-start; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+#schedule-status { margin: 16px 0 0; }
+.schedule-result { border-top: 1px solid var(--border-strong); margin-top: 24px; padding-top: 20px; animation: schedule-reveal .3s ease-out; }
+.schedule-result h3 { margin: 0; font-family: var(--font-display); font-size: 1.4rem; }
+.schedule-metrics { font-weight: 600; color: var(--navy); }
+.schedule-course-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.schedule-course-lists h4 { margin: 0; }
+.schedule-course-lists ul { margin: 8px 0; padding-left: 20px; line-height: 1.7; }
+.schedule-timeline { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.semester-card { border: 1px solid var(--border-strong); border-top: 4px solid var(--maize); border-radius: 12px; padding: 18px; background: linear-gradient(145deg, #fffdf8, #f6f0df); }
+.semester-card h4 { font-family: var(--font-display); font-size: 1.3rem; margin: 0; }
+.semester-credits { color: var(--muted); margin-top: 6px; }
+.semester-course { padding: 14px 0; border-top: 1px solid var(--border); }
+.semester-course p { margin: 6px 0; font-size: .9rem; }
+.semester-course small { display: block; color: var(--muted); line-height: 1.6; }
+.semester-course .section-kicker { display: inline-block; margin-left: 8px; }
+.schedule-course-link { cursor: pointer; font-weight: 700; color: var(--navy); border: 0; border-bottom: 1px solid var(--navy); background: transparent; padding: 0; }
+.schedule-assumptions { margin-top: 16px; line-height: 1.7; overflow-wrap: anywhere; }
+.schedule-assumptions li { margin: 8px 0; color: var(--muted); }
+@keyframes schedule-reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .schedule-result { animation: none; } }
+@media (max-width: 1200px) { .schedule-settings { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) {
+  .schedule-controls { grid-template-columns: 1fr; gap: 14px; }
+  .schedule-course-lists { grid-template-columns: 1fr; }
+  .schedule-timeline { grid-template-columns: 1fr; }
+  .schedule-result .section-heading { align-items: flex-start; flex-wrap: wrap; }
+}
+
 .mono {
   font-family: "Consolas", "SFMono-Regular", monospace;
 }

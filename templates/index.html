@@ -25,6 +25,52 @@
 
       <section class="notice-banner" id="disclaimer-banner"></section>
 
+      <section class="card scheduler-card" aria-labelledby="schedule-heading">
+        <div class="schedule-heading">
+          <div>
+            <p class="eyebrow">From dependencies to a plan</p>
+            <h2 id="schedule-heading">Semester Planner</h2>
+            <p class="helper-text">Choose your targets. Compare a quick heuristic with an optimizer that considers alternative prerequisites together.</p>
+          </div>
+          <span class="schedule-badge">Read-only planning</span>
+        </div>
+        <form id="schedule-form">
+          <div class="schedule-controls">
+            <div class="schedule-targets">
+              <details>
+                <summary>Target courses <span id="schedule-target-count"></span></summary>
+                <p class="helper-text">These are all mandatory goals, not alternatives. Your graph's target tags are selected initially.</p>
+                <div id="schedule-targets" class="schedule-checklist"></div>
+              </details>
+              <details>
+                <summary>Exclude courses <span id="schedule-excluded-count"></span></summary>
+                <p class="helper-text">Avoid a prerequisite option. Targets and completed courses cannot be excluded.</p>
+                <div id="schedule-excluded" class="schedule-checklist"></div>
+              </details>
+              <p id="schedule-completed" class="helper-text"></p>
+              <p class="helper-text">Only <strong>Completed</strong> counts as prior credit. Current courses are not assumed finished. Change status or edit offerings/difficulty in Course Detail.</p>
+            </div>
+            <div class="schedule-settings">
+              <label>Start term<select id="schedule-season" class="text-input"><option>Fall</option><option>Winter</option><option>Spring</option><option>Summer</option></select></label>
+              <label>Start year<input id="schedule-year" class="text-input" type="number" min="2000" max="2100" required></label>
+              <label>Credits / term, max<input id="schedule-credits" class="text-input" type="number" min="1" max="40" value="16" required></label>
+              <label>Planning terms<input id="schedule-horizon" class="text-input" type="number" min="1" max="16" value="8" required></label>
+              <label>Difficult courses / term, max<input id="schedule-difficult" class="text-input" type="number" min="0" max="40" value="2" required></label>
+              <label>Strategy<select id="schedule-strategy" class="text-input" aria-label="Strategy"><option value="constraint">Constraint optimizer</option><option value="greedy">Greedy heuristic</option><option value="compare">Compare both</option></select></label>
+              <label>Priority<select id="schedule-objective" class="text-input" aria-label="Priority"><option value="fewest_courses">Fewest courses, then earliest finish</option><option value="fastest">Earliest finish, then fewest courses</option></select></label>
+              <label class="checkbox-inline schedule-summer"><input id="schedule-summer" type="checkbox"><span>Include Spring / Summer</span></label>
+            </div>
+          </div>
+          <div class="schedule-actions">
+            <button type="submit" id="generate-schedule-btn" class="primary-btn" disabled>Generate Plan</button>
+            <button type="button" id="download-schedule-btn" class="secondary-btn" disabled>Download Plan JSON</button>
+            <span class="helper-text">Workload is balanced after the selected priorities. Difficulty 4-5 counts as difficult.</span>
+          </div>
+        </form>
+        <div id="schedule-status" role="status" aria-live="polite" class="helper-text">Loading course catalog...</div>
+        <div id="schedule-results"></div>
+      </section>
+
       <main class="app-grid">
         <aside class="sidebar left-sidebar">
           <section class="card action-card">
@@ -94,7 +140,7 @@
           <section class="card">
             <div class="section-heading">
               <h2>Gateway Courses</h2>
-              <span class="section-kicker">Highest downstream unlock count</span>
+              <span class="section-kicker">Newly eligible if completed next</span>
             </div>
             <div id="gateway-list" class="mini-list"></div>
           </section>
@@ -153,6 +199,7 @@
     <script src="https://unpkg.com/cytoscape@3.29.2/dist/cytoscape.min.js"></script>
     <script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
     <script src="https://unpkg.com/cytoscape-svg@0.4.0/cytoscape-svg.js"></script>
+    <script src="{{ url_for('static', filename='schedule.js') }}"></script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
   </body>
 </html>

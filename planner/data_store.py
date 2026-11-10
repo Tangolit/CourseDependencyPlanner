@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from threading import RLock
 
 from planner.graph_logic import (
     DEFAULT_INTEREST_LEVELS,
@@ -14,13 +16,7 @@ from planner.graph_logic import (
     expression_to_course_ids,
     normalize_dataset,
 )
-
-
-class ValidationError(Exception):
-    def __init__(self, errors: list[str], warnings: list[str] | None = None):
-        super().__init__("\n".join(errors))
-        self.errors = errors
-        self.warnings = warnings or []
+from planner.validation.input import ValidationError, validate_raw_dataset
 
 
 class CourseDataStore:
@@ -29,12 +25,14 @@ class CourseDataStore:
         self.data_path = data_path or root / "data" / "courses.json"
         self.history_limit = history_limit
         self._history: list[dict] = []
+        self._lock = RLock()
         self.data_path.parent.mkdir(parents=True, exist_ok=True)
         if not self.data_path.exists():
             raise FileNotFoundError(f"Missing data file at {self.data_path}")
 
     def get_data(self) -> dict:
-        return normalize_dataset(self._read())
+        with self._lock:
+            return normalize_dataset(self._read())
 
     def save_data(self, data: dict, force: bool = False):
         return self._persist(data, force=force)
@@ -43,11 +41,13 @@ class CourseDataStore:
         return self._persist(data, force=force)
 
     def undo(self):
-        if not self._history:
-            return None
-        restored = self._history.pop()
-        self._write(restored)
-        return normalize_dataset(restored)
+        with self._lock:
+            if not self._history:
+                return None
+            restored = self._history[-1]
+            self._write(restored)
+            self._history.pop()
+            return normalize_dataset(restored)
 
     def write_export_snapshot(self) -> Path:
         snapshot = self.get_data()
@@ -57,6 +57,11 @@ class CourseDataStore:
             return Path(handle.name)
 
     def _persist(self, data: dict, force: bool = False):
+        with self._lock:
+            return self._persist_locked(data, force)
+
+    def _persist_locked(self, data: dict, force: bool):
+        validate_raw_dataset(data)
         normalized = normalize_dataset(data)
         errors, warnings = validate_dataset(normalized)
         if errors:
@@ -64,18 +69,29 @@ class CourseDataStore:
         if warnings and not force:
             return normalized, warnings
         current = self.get_data()
+        normalized["meta"]["last_saved"] = datetime.now(timezone.utc).isoformat()
+        self._write(normalized)
         self._history.append(deepcopy(current))
         if len(self._history) > self.history_limit:
             self._history.pop(0)
-        normalized["meta"]["last_saved"] = datetime.now(timezone.utc).isoformat()
-        self._write(normalized)
         return normalized, warnings
 
     def _read(self) -> dict:
         return json.loads(self.data_path.read_text(encoding="utf-8"))
 
     def _write(self, data: dict):
-        self.data_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        temporary = None
+        try:
+            with NamedTemporaryFile("w", encoding="utf-8", dir=self.data_path.parent, delete=False) as handle:
+                temporary = Path(handle.name)
+                json.dump(data, handle, indent=2)
+                handle.write("\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, self.data_path)
+        finally:
+            if temporary and temporary.exists():
+                temporary.unlink()
 
 
 def validate_dataset(data: dict):

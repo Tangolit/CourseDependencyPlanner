@@ -1,9 +1,15 @@
 from __future__ import annotations
 
-from collections import deque
 from copy import deepcopy
+from itertools import islice
 
 import networkx as nx
+
+from planner.domain.course import Course
+from planner.domain.requirements import AllOf, AnyOf, CourseRef, parse_requirement
+from planner.services.eligibility_service import EligibilityService
+from planner.services.prerequisite_planner import PrerequisitePlanner
+from planner.services.schedule_optimizer import requirement_witness
 
 
 DEFAULT_STATUSES = ["completed", "current", "planned", "interested", "not_started"]
@@ -37,6 +43,7 @@ def normalize_course(course: dict) -> dict:
         "title": (course.get("title") or "").strip(),
         "description": (course.get("description") or "").strip(),
         "credits": int(course.get("credits") or 0),
+        "difficulty": int(course.get("difficulty", 3)),
         "status": course.get("status") if course.get("status") in DEFAULT_STATUSES else "not_started",
         "interest": course.get("interest") if course.get("interest") in DEFAULT_INTEREST_LEVELS else "medium",
         "categories": _normalize_list(course.get("categories")),
@@ -58,7 +65,7 @@ def normalize_dataset(data: dict) -> dict:
     )
     meta.setdefault("target_course_id", "")
     courses = [normalize_course(course) for course in data.get("courses", [])]
-    known_tags = set(DEFAULT_TAGS)
+    known_tags = set(DEFAULT_TAGS if "tag_catalog" not in data else [])
     known_tags.update(_normalize_list(data.get("tag_catalog")))
     for course in courses:
         known_tags.update(course["categories"])
@@ -71,24 +78,10 @@ def normalize_dataset(data: dict) -> dict:
 
 
 def normalize_prerequisites(expr):
-    if not expr:
-        return {"all_of": []}
-    if isinstance(expr, str):
-        return {"all_of": [expr.strip()]}
-    if isinstance(expr, list):
-        return {"all_of": [item.strip() for item in expr if isinstance(item, str) and item.strip()]}
-    if isinstance(expr, dict):
-        if "all_of" in expr:
-            return {"all_of": [normalize_prerequisites(item) if isinstance(item, (dict, list)) else item.strip() for item in expr["all_of"] if _valid_prereq_item(item)]}
-        if "any_of" in expr:
-            return {"any_of": [normalize_prerequisites(item) if isinstance(item, (dict, list)) else item.strip() for item in expr["any_of"] if _valid_prereq_item(item)]}
-    return {"all_of": []}
-
-
-def _valid_prereq_item(item) -> bool:
-    if isinstance(item, str):
-        return bool(item.strip())
-    return isinstance(item, (dict, list))
+    requirement = parse_requirement(expr)
+    if isinstance(requirement, CourseRef):
+        requirement = AllOf((requirement,))
+    return requirement.serialize()
 
 
 def _normalize_list(values) -> list[str]:
@@ -160,70 +153,42 @@ def extract_prerequisite_edges(expr, parent_type="all_of", group_path=()):
 
 
 def expression_to_course_ids(expr) -> set[str]:
-    course_ids = set()
-    if isinstance(expr, str):
-        if expr.strip():
-            course_ids.add(expr.strip())
-        return course_ids
-    if isinstance(expr, dict):
-        for key in ("all_of", "any_of"):
-            for item in expr.get(key, []):
-                course_ids.update(expression_to_course_ids(item))
-    return course_ids
+    return set(parse_requirement(expr).course_ids())
 
 
 def evaluate_prerequisites(expr, completed_courses: set[str]) -> bool:
-    if not expr:
-        return True
-    if isinstance(expr, str):
-        return expr.strip() in completed_courses
-    if isinstance(expr, dict):
-        if "all_of" in expr:
-            return all(evaluate_prerequisites(item, completed_courses) for item in expr.get("all_of", []))
-        if "any_of" in expr:
-            options = expr.get("any_of", [])
-            if not options:
-                return False
-            return any(evaluate_prerequisites(item, completed_courses) for item in options)
-    return True
+    return parse_requirement(expr).satisfied(completed_courses)
+
+
+def _direct_missing(requirement, completed):
+    if requirement.satisfied(completed):
+        return set()
+    if isinstance(requirement, CourseRef):
+        return {requirement.course_id}
+    choices = [_direct_missing(child, completed) for child in requirement.children]
+    if isinstance(requirement, AnyOf):
+        valid = [choice for choice in choices if choice is not None]
+        return min(valid, key=lambda ids: (len(ids), sorted(ids))) if valid else None
+    if any(choice is None for choice in choices):
+        return None
+    return set().union(*choices)
 
 
 def summarize_requirement_groups(expr, completed_courses: set[str]):
-    if not expr:
-        return []
-    root_items = expr.get("all_of", []) if isinstance(expr, dict) and "all_of" in expr else [expr]
+    requirement = parse_requirement(expr)
+    root_items = requirement.children if isinstance(requirement, AllOf) else (requirement,)
     groups = []
     for item in root_items:
-        if isinstance(item, str):
-            course_id = item.strip()
-            groups.append(
-                {
-                    "type": "all_of",
-                    "group_index": len(groups),
-                    "label": "All of these are required",
-                    "course_ids": [course_id],
-                    "satisfied": course_id in completed_courses,
-                    "missing": [] if course_id in completed_courses else [course_id],
-                    "satisfied_by": [course_id] if course_id in completed_courses else [],
-                }
-            )
-            continue
-
-        if isinstance(item, dict):
-            group_type = "any_of" if "any_of" in item else "all_of"
-            course_ids = sorted(expression_to_course_ids(item))
-            satisfied_by = sorted(course_id for course_id in course_ids if course_id in completed_courses)
-            groups.append(
-                {
-                    "type": group_type,
-                    "group_index": len(groups),
-                    "label": "One of these options is required" if group_type == "any_of" else "All of these are required",
-                    "course_ids": course_ids,
-                    "satisfied": evaluate_prerequisites(item, completed_courses),
-                    "missing": [] if evaluate_prerequisites(item, completed_courses) else course_ids,
-                    "satisfied_by": satisfied_by,
-                }
-            )
+        any_of = isinstance(item, AnyOf)
+        satisfied = item.satisfied(completed_courses)
+        missing = _direct_missing(item, completed_courses)
+        groups.append({
+            "type": "any_of" if any_of else "all_of", "group_index": len(groups),
+            "label": "One of these options is required" if any_of else "All of these are required",
+            "expression": item.serialize(), "course_ids": sorted(item.course_ids()),
+            "satisfied": satisfied, "missing": sorted(missing or []),
+            "satisfied_by": sorted(requirement_witness(item, completed_courses)) if satisfied else [],
+        })
     return groups
 
 
@@ -258,13 +223,13 @@ def get_missing_prerequisites(data: dict, target_course_id: str, completed_cours
         return {"missing_course_ids": [], "groups": []}
 
     groups = summarize_requirement_groups(course["prerequisites"], completed_courses)
-    missing = []
-    for group in groups:
-        if not group["satisfied"]:
-            for course_id in group["missing"]:
-                if course_id not in missing:
-                    missing.append(course_id)
-    return {"missing_course_ids": missing, "groups": groups}
+    courses = {cid: Course.from_dict(item) for cid, item in lookup.items()}
+    plan = PrerequisitePlanner(courses, time_limit=0.3, max_states=10_000).plan(
+        [target_course_id], completed_courses
+    )
+    return {"missing_course_ids": sorted(set(plan.course_ids) - {target_course_id}),
+            "groups": groups, "status": plan.status,
+            "meaning": "One minimum-count prerequisite closure, not every OR alternative."}
 
 
 def find_paths_to_target(graph: nx.DiGraph, target_course_id: str, completed_courses: set[str], max_paths: int = 20):
@@ -299,10 +264,18 @@ def find_paths_to_target(graph: nx.DiGraph, target_course_id: str, completed_cou
     return paths
 
 
-def rank_gateway_courses(graph: nx.DiGraph) -> list[dict]:
+def rank_gateway_courses(graph: nx.DiGraph, data: dict | None = None) -> list[dict]:
     rankings = []
+    if data is None:
+        data = {"courses": [attributes["course"] for _, attributes in graph.nodes(data=True)
+                            if "status" in attributes.get("course", {})]}
+    courses = {course["id"]: Course.from_dict(course) for course in data["courses"]}
+    completed = get_completed_courses(data)
+    eligibility = EligibilityService(courses)
     for course_id in graph.nodes:
-        unlocked = sorted(nx.descendants(graph, course_id))
+        if course_id in completed or course_id not in courses:
+            continue
+        unlocked = eligibility.marginal_unlocks(course_id, completed)
         if not unlocked:
             continue
         rankings.append(
@@ -310,15 +283,38 @@ def rank_gateway_courses(graph: nx.DiGraph) -> list[dict]:
                 "course_id": course_id,
                 "unlock_count": len(unlocked),
                 "unlocks": unlocked[:8],
+                "structural_downstream_count": len(nx.descendants(graph, course_id)),
+                "eligible_now": course_id in eligibility.eligible(completed),
             }
         )
     rankings.sort(key=lambda item: (-item["unlock_count"], item["course_id"]))
     return rankings
 
 
+def requirement_edge_metadata(requirement, completed):
+    occurrences = {}
+
+    def visit(item, optional=False, active=True):
+        if isinstance(item, CourseRef):
+            occurrences.setdefault(item.course_id, []).append((optional, active))
+            return
+        choose_satisfied = isinstance(item, AnyOf) and item.satisfied(completed)
+        for child in item.children:
+            visit(child, optional or isinstance(item, AnyOf),
+                  active and (not choose_satisfied or child.satisfied(completed)))
+
+    visit(requirement)
+    return {cid: {
+        "isAnyOf": all(optional for optional, _ in entries),
+        "isAllOf": any(not optional for optional, _ in entries),
+        "hideWhenAlternativeSatisfied": not any(active for _, active in entries),
+        "alternativeSatisfiedBy": [cid] if cid in completed and any(active for _, active in entries) else [],
+    } for cid, entries in occurrences.items()}
+
+
 def detect_prerequisite_cycles(graph: nx.DiGraph) -> list[list[str]]:
     try:
-        cycles = list(nx.simple_cycles(graph))
+        cycles = list(islice(nx.simple_cycles(graph), 20))
     except nx.NetworkXNoCycle:
         return []
     normalized = []
@@ -409,21 +405,7 @@ def build_state_payload(data: dict) -> dict:
     edges = []
     for src, dest, edge_data in graph.edges(data=True):
         course = course_lookup.get(dest)
-        requirement_groups = summarize_requirement_groups(course["prerequisites"], completed_courses) if course else []
-        edge_group_indexes = sorted(
-            {
-                entry["group_path"][0]
-                for entry in edge_data.get("entries", [])
-                if entry.get("group_path")
-            }
-        )
-        related_groups = [group for group in requirement_groups if group["group_index"] in edge_group_indexes]
-        is_any_of = any(group["type"] == "any_of" for group in related_groups)
-        alternative_hidden = False
-        satisfied_by = []
-        if is_any_of:
-            satisfied_by = sorted({course_id for group in related_groups for course_id in group.get("satisfied_by", [])})
-            alternative_hidden = bool(satisfied_by) and src not in satisfied_by
+        semantics = requirement_edge_metadata(parse_requirement(course["prerequisites"]), completed_courses)[src]
         edges.append(
             {
                 "data": {
@@ -433,10 +415,7 @@ def build_state_payload(data: dict) -> dict:
                     "labels": edge_data.get("labels", []),
                     "label": " / ".join(edge_data.get("labels", [])),
                     "verified": bool(course and course.get("verified")),
-                    "isAnyOf": is_any_of,
-                    "isAllOf": any(group["type"] == "all_of" for group in related_groups),
-                    "alternativeSatisfiedBy": satisfied_by,
-                    "hideWhenAlternativeSatisfied": alternative_hidden,
+                    **semantics,
                 }
             }
         )
@@ -458,7 +437,7 @@ def build_state_payload(data: dict) -> dict:
         "graph": {
             "nodes": nodes,
             "edges": edges,
-            "gateway_courses": rank_gateway_courses(graph),
+            "gateway_courses": rank_gateway_courses(graph, data),
             "cycles": detect_prerequisite_cycles(graph),
             "next_options": find_next_options(data, completed_courses),
             "course_insights": course_insights,
